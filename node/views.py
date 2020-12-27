@@ -91,8 +91,8 @@ def api_node_list(request):
     pass
 
 def api_node_parameter(request):
-    if request.POST:
-        device_name = request.POST.get('device_name', None)
+    if request.GET:
+        device_name = request.GET.get('device_name', None)
         if device_name:
             nodes = Node.objects.filter(device_name=device_name)
             if nodes.count() > 0:
