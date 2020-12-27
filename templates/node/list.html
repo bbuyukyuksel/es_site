@@ -15,16 +15,18 @@
                                     <td>Device Name</td>
                                     <td>IP Address</td>
                                     <td>Threshold</td>
+                                    <td>Measurement Delay Time [s]</td>
                                     <td>Temperature Average</td>
                                     <td>Total Data Size</td>
                                     <td>Last Data Date</td>
-                                    <td>Delete Data</td>
+                                    <td>Delete Temperature Data</td>
                                 </tr>
                                 {% for node in nodes %}
                                 <tr>
                                     <td>{{ node.device_name }}</td>
                                     <td>{{ node.ip_address }}</td>
                                     <td>{{ node.threshold }}</td>
+                                    <td>{{ node.measurement_delay_time }}</td>
                                     <td>{{ node.temperature_this_mount_average }} </td>
                                     <td>{{ node.temperature_this_mount_count}}</td>
                                     <td>#</td>

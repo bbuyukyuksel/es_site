@@ -10,8 +10,9 @@ class Node(models.Model):
     device_name = models.CharField(max_length=200, verbose_name='Device Name', unique=True)
     ip_address = models.CharField(max_length=200, verbose_name='IP Address', unique=True)
     threshold = models.FloatField(verbose_name='Threshold', blank=True)
-    power_state = models.BooleanField(verbose_name="Power State", default=False)
+    power_state = models.BooleanField(verbose_name='Power State', default=False)
     created_date = models.DateTimeField('Created Date', auto_now_add=True)
+    measurement_delay_time = models.BigIntegerField(verbose_name='Measurement Delay Time')
 
     def __str__(self):
         return self.device_name
@@ -28,7 +29,6 @@ class Node(models.Model):
             if self.temperature_this_mount().count() > 1:
                 # Get Average of temperature_this_mount:list
                 _sum_ = sum([x.temperature for x in self.temperature_this_mount() ])
-
                 return round(_sum_ / self.temperature_this_mount().count(), 2)
             else:
                 return self.temperature_this_mount().first().temperature

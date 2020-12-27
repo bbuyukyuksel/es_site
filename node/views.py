@@ -2,7 +2,6 @@ from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
 from node.models import Node, Temperature
 import json
 
-
 # Create your views here.
 def index(request):
     Chart_Values = []
@@ -42,31 +41,32 @@ def node_detail(request):
 
 def node_list(request):
     nodes = Node.objects.all()
-    t = nodes.first().temperature_last_update_date()
-    print("Last:", t)
+    if nodes.count() > 0:
+        t = nodes.first().temperature_last_update_date()
+        print("Last:", t)
     return render(request, 'node/list.html', context={'nodes':nodes})
-
-
 
 def api_node_create(request):
     if request.GET:
         device_name = request.GET.get("device_name")
         ip_address = request.GET.get('ip_address', None)
         threshold = request.GET.get('threshold', None)
+        m_d_time = request.GET.get('m_d_time', None)
 
         confirm = request.GET.get("confirm", None)
-        if confirm and device_name and ip_address and threshold:
+        if confirm and device_name and ip_address and threshold and m_d_time:
             ip_address = ip_address.strip()
             
             unique_contol_device_name = Node.objects.filter(device_name=device_name)
             unique_contol_ip_address = Node.objects.filter(ip_address=ip_address)
+            
             if unique_contol_device_name.count() > 0:
                 return HttpResponse(f"Already saved {device_name}")
 
             if unique_contol_ip_address.count() > 0:
                 return HttpResponse(f"Already saved {ip_address}")
 
-            node = Node(device_name=device_name, threshold=threshold, ip_address=ip_address)
+            node = Node(device_name=device_name, ip_address=ip_address, threshold=threshold, measurement_delay_time=m_d_time)
             node.save()
             return redirect('node:node_list')
             #return HttpResponse(f"Get Request api_node_create {device_name}, {confirm}, Saved PK: {node.pk}")
@@ -99,7 +99,8 @@ def api_node_parameter(request):
                 node = nodes.first()
                 parameter = {
                     str(node.device_name): {
-                        "threshold":node.threshold    
+                        "threshold":node.threshold,
+                        "m_d_time": node.measurement_delay_time,    
                     } ,
                 }
                 return HttpResponse(json.dumps(parameter))
