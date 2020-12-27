@@ -24,10 +24,10 @@
                         <ul class="collapse">
                             <li><a href="#" aria-expanded="true">Node</a>
                                 <ul class="collapse">
-                                    <li><a href="#">Create</a></li>
-                                    <li><a href="#">Detail</a></li>
-                                    <li><a href="#">Delete</a></li>
-                                    <li><a href="#">List</a></li>
+                                    <li><a href="{% url 'node:node_create' %}">Create</a></li>
+                                    <li><a href="{% url 'node:node_detail' %}">Detail</a></li>
+                                    <li><a href="{% url 'node:node_delete' %}">Delete</a></li>
+                                    <li><a href="{% url 'node:node_list' %}">List</a></li>
                                 </ul>
                             </li>
                         </ul>

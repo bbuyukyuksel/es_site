@@ -17,6 +17,8 @@ urlpatterns = [
     path('api/node/list', node.views.api_node_list, name='api_node_list'),
 
     path('api/temperature/create', node.views.api_node_temperature_create, name='api_temperature_create'),
+    path('api/temperature/delete_all', node.views.api_node_temperature_delete_all, name='api_temperature_delete_all'),
+    path('api/temperature/delete/<int:pk>', node.views.api_node_temperature_delete, name='api_temperature_delete'),
 
 ]
 
