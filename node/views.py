@@ -51,13 +51,22 @@ def node_list(request):
 def api_node_create(request):
     if request.GET:
         device_name = request.GET.get("device_name")
+        ip_address = request.GET.get('ip_address', None)
+        threshold = request.GET.get('threshold', None)
+
         confirm = request.GET.get("confirm", None)
-        if confirm:
-            unique_contol = Node.objects.filter(device_name=device_name)
-            if unique_contol.count() > 0:
+        if confirm and device_name and ip_address and threshold:
+            ip_address = ip_address.strip()
+            
+            unique_contol_device_name = Node.objects.filter(device_name=device_name)
+            unique_contol_ip_address = Node.objects.filter(ip_address=ip_address)
+            if unique_contol_device_name.count() > 0:
                 return HttpResponse(f"Already saved {device_name}")
 
-            node = Node(device_name=device_name)
+            if unique_contol_ip_address.count() > 0:
+                return HttpResponse(f"Already saved {ip_address}")
+
+            node = Node(device_name=device_name, threshold=threshold, ip_address=ip_address)
             node.save()
             return redirect('node:node_list')
             #return HttpResponse(f"Get Request api_node_create {device_name}, {confirm}, Saved PK: {node.pk}")
@@ -81,10 +90,30 @@ def api_node_list(request):
         return HttpResponse("Get Request api_node_list")
     pass
 
+def api_node_parameter(request):
+    if request.POST:
+        device_name = request.POST.get('device_name', None)
+        if device_name:
+            nodes = Node.objects.filter(device_name=device_name)
+            if nodes.count() > 0:
+                node = nodes.first()
+                parameter = {
+                    str(node.device_name): {
+                        "threshold":node.threshold    
+                    } ,
+                }
+                return HttpResponse(json.dumps(parameter))
+
+            else:
+                return HttpResponse("-1")
+
+
+
 def api_node_temperature_create(request):
     if request.GET:
         device_name = request.GET.get('device_name', None)
         temperature = request.GET.get('temperature', None)
+
         if device_name and temperature:
             device = Node.objects.filter(device_name=device_name)
             if device.count() > 0:

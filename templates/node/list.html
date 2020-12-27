@@ -13,6 +13,8 @@
                             <table class="dbkit-table">
                                 <tr class="heading-td">
                                     <td>Device Name</td>
+                                    <td>IP Address</td>
+                                    <td>Threshold</td>
                                     <td>Temperature Average</td>
                                     <td>Total Data Size</td>
                                     <td>Last Data Date</td>
@@ -21,6 +23,8 @@
                                 {% for node in nodes %}
                                 <tr>
                                     <td>{{ node.device_name }}</td>
+                                    <td>{{ node.ip_address }}</td>
+                                    <td>{{ node.threshold }}</td>
                                     <td>{{ node.temperature_this_mount_average }} </td>
                                     <td>{{ node.temperature_this_mount_count}}</td>
                                     <td>#</td>

@@ -8,6 +8,8 @@ import math
 # Create your models here.
 class Node(models.Model):
     device_name = models.CharField(max_length=200, verbose_name='Device Name', unique=True)
+    ip_address = models.CharField(max_length=200, verbose_name='IP Address', unique=True)
+    threshold = models.FloatField(verbose_name='Threshold', blank=True)
     power_state = models.BooleanField(verbose_name="Power State", default=False)
     created_date = models.DateTimeField('Created Date', auto_now_add=True)
 
