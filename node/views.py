@@ -42,7 +42,6 @@ def index(request):
         Chart_Values.append(temp)
     return render(request, 'node/index.html', context={"chart_values":Chart_Values})
 
-
 def node_create(request):
     context = {
         "form_name": "Create",
@@ -58,15 +57,6 @@ def node_update(request, pk):
         'node': node,
     }
     return render(request, 'node/form_node_update.html', context=context)
-
-    
-
-
-def node_delete(request):
-    pass
-
-def node_detail(request):
-    pass
 
 def node_list(request):
     nodes = Node.objects.all()
@@ -172,7 +162,7 @@ def api_node_temperature_list(request, offsetdate):
     for index, node in enumerate(nodes):
         date_from = timezone.now().date() - datetime.timedelta(days=abs(offsetdate))
         temperature_objs = None
-        print("Offsetdate", offsetdate)
+        
         if offsetdate == 0:
             temperature_objs= node.temperature_set.filter(created_date__date=date_from)
         else:
@@ -213,7 +203,7 @@ def api_node_temperature_create(request):
 def api_node_temperature_delete_all(request):
     if request.GET:
         if request.GET.get("confirm").lower() == 'true':
-            Temperature.objects.all().delete
+            Temperature.objects.all().delete()
             return redirect('node:node_list')
             #return HttpResponse("All temperatures all deleted!")
 
