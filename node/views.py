@@ -1,7 +1,10 @@
 from django.shortcuts import render, HttpResponse, redirect, get_object_or_404, reverse
 from node.models import Node, Temperature
 from django.contrib import messages
+from django.utils import timezone
+import datetime
 import json
+import random
 
 '''
 messages.debug(request, '%s SQL statements were executed.' % count)
@@ -157,6 +160,34 @@ def api_node_parameter(request):
 
             else:
                 return HttpResponse("-1")
+
+
+def api_node_temperature_list(request, offsetdate):
+    def fake_color():
+        color = '#{:02x}{:02x}{:02x}'.format(*map(lambda x: random.randint(0, 255), range(3)))
+        return color    
+
+    nodes = Node.objects.all()
+    response = {}
+    for index, node in enumerate(nodes):
+        date_from = timezone.now().date() - datetime.timedelta(days=abs(offsetdate))
+        temperature_objs = None
+        print("Offsetdate", offsetdate)
+        if offsetdate == 0:
+            temperature_objs= node.temperature_set.filter(created_date__date=date_from)
+        else:
+            temperature_objs= node.temperature_set.filter(created_date__gt=date_from)
+        
+        temperature_list = [x.temperature for x in temperature_objs]
+
+        response[node.device_name] = {}
+        response[node.device_name]["temperature_list"] = temperature_list
+        response[node.device_name]["index"] = index
+        response[node.device_name]["color"] = fake_color()
+
+
+    return HttpResponse(json.dumps(response))
+
 
 def api_node_is_active(request):
     nodes = Node.objects.all()

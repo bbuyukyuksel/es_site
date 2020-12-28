@@ -8,10 +8,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <h4 class="header-title mb-0">Temperatures</h4>
-                    <select class="custome-select border-0 pr-3">
-                        <option selected>Last 30 Days</option>
-                        <option value="0">Today</option>
-                    </select>
+                    <p>Last <input id="offsetdate" type="number" value=30 placeholder="30" style="width:4em;padding-left: 1em;"> Days</p>
                 </div>
                 <div id="verview-shart"></div>
             </div>
@@ -22,11 +19,10 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="header-title">Device Power State</h4>
+                    <h4 class="header-title">Devices</h4>
                     <div class="cripto-live mt-5">
-                        <ul>
-                            <li> <i class="fa fa-heartbeat" style='color:orange;'></i> Node-0001<span><i class="fa fa-clock-o"></i>Running</span></li>
-                            <li> <i class="fa fa-heartbeat" style='color:orange;'></i> Node-0002<span><i class="fa fa-clock-o" style='color:red;'></i>Stop</span></li>
+                        <ul id="device_list">
+                            
                         </ul>
                     </div>
                 </div>
@@ -39,6 +35,9 @@
 {% block js %}
 <script language="javascript">
 /*--------------  overview-chart start ------------*/
+var oldResponse = {};
+var oldColor = {};
+
 if ($('#verview-shart').length) {
     var myConfig = {
         "type": "line",
@@ -59,15 +58,88 @@ if ($('#verview-shart').length) {
             }
         },
         "plot": { "aspect": "spline" },
-        "series": {{chart_values|safe }},
+        "series": [],
     };
 
-    zingchart.render({
-        id: 'verview-shart',
-        data: myConfig,
-        height: "100%",
-        width: "100%"
-    });
+    function refresh_devices(){
+        Object.keys(oldResponse).forEach(function(key) {
+            if(document.getElementById(`device-${key}`) == null){
+                var color = "#ABABAB";
+                var t = `<i id='device-${key}' class='fa fa-heartbeat' style='color:${color};margin-right:1rem;'></i> ${key}`;
+                var ul = document.getElementById("device_list");
+                var li = document.createElement("li");
+                li.innerHTML = t;
+                ul.appendChild(li);
+            }
+            else{
+                if(oldResponse[key]["temperature_list"].length > 0){
+                    var color = undefined;
+                    if(oldResponse[key]["temperature_list"].length > 0){
+                        color = oldColor[key];
+                    }
+                    else{
+                        color = "#000000";
+                    }
+                    document.getElementById(`device-${key}`).style.color = color;
+                }
+            }
+        });
+        setTimeout(refresh_devices, 2000);
+    }
+
+
+    function render_graph(){
+        var offsetdate = parseInt(document.getElementById("offsetdate").value);
+
+        if(isNaN(offsetdate)){
+            alert("Please enter valid number!");
+        }
+        else{
+            $.getJSON(`/api/node/temperature_list/${offsetdate}`, {}, function (data, textStatus, jqXHR){
+                myConfig.series = [];
+                Object.keys(data).forEach(function(key) {          
+                    if(data[key]["temperature_list"].length > 0){
+                        var color;                        
+                        if(oldColor[key] === undefined){
+                            color = data[key]["color"];
+                            oldColor[key] = color;
+                        }
+                        else{
+                            color = oldColor[key];
+                            console.log("set old color!");
+                        }
+                        myConfig.series.push({
+                            "line-color": color, 
+                            "line-width":5, 
+                            "marker":{
+                                "background-color":color, 
+                                "size":5, 
+                                "border-color":color
+                                }, 
+                                "values":data[key]["temperature_list"]
+                            }
+                        );
+                    }
+                });
+                zingchart.render({
+                    id: 'verview-shart',
+                    data: myConfig,
+                    height: "100%",
+                    width: "100%"
+                });
+
+                oldResponse = data;
+            });    
+        }
+        setTimeout(render_graph, 2000);
+    }
+    render_graph();
+    refresh_devices();
+    
+
+    /*
+    myConfig.series.push({"line-color":"#aabbcc", "line-width":5, "marker":{"background-color":"#067dce", "size":5, "border-color":"#067dce"}, "values":[10,20,30,40,50]})
+    */
 }
 
 /*--------------  overview-chart END ------------*/
