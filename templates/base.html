@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>srtdash - ICO Dashboard</title>
+    <title>Embedded Systems | Project </title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" type="image/png" href="{% static '/media/images/icon/favicon.ico' %}">
     <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
@@ -44,6 +44,10 @@
             {% include 'page_title_area.html' %}
             <!-- page title area end -->
             <div class="main-content-inner">
+                
+                {% include 'messages.html' %}
+
+
                 {% block content %} 
                   <p> There is content!</p>
                 {% endblock %}

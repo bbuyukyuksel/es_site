@@ -1,0 +1,53 @@
+{% extends 'base.html'%}
+
+{% block content %}
+<form action="{% url 'node:api_node_create' %}" method="POST">
+    <!-- 
+        Request Params:
+            text: device_name,
+            checkbox: confirm
+    -->
+    {% csrf_token %}
+    <div class="col-12 mt-5">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="header-title">Node {% if form_name %} {{form_name}} {% endif %}</h4>
+                <form>
+                    <div class="form-group">
+                        <label for="device_name">Device Name</label>
+                        <input name="device_name" type="text" class="form-control" id="device_name" aria-describedby="device_name" placeholder="Device Name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ip_address">IP Address</label>
+                        <input name="ip_address" type="text" class="form-control" id="ip_address" aria-describedby="ip_address" placeholder="192.168.1.xxx">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="threshold">Threshold</label>
+                        <input name="threshold" type="number" class="form-control" id="threshold" aria-describedby="threshold" placeholder="Ex: 25.7" 
+                            value=20
+                            step=0.01
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="m_d_time">Measurement Delay Time [s]</label>
+                        <input name="m_d_time" type="number" class="form-control" id="m_d_time" aria-describedby="m_d_time" placeholder="Ex: 60000" 
+                            value=60
+                        >
+                    </div>
+
+                    <div class="form-check">
+                        <input name="confirm" type="checkbox" class="form-check-input" id="approval">
+                        <label class="form-check-label" for="confirm">Confirm </label>
+                        <small  class="form-text text-muted">Do you confirm that the device name you entered is correct?</small>
+                    </div>
+                    <button type="submit" onClick="" class="btn btn-primary mt-4 pr-4 pl-4">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+

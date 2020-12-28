@@ -1,48 +1,76 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="col-lg-12 mt-sm-30 mt-xs-30">
+
+
+
+<div class="col-12 mt-5">
     <div class="card">
         <div class="card-body">
-            <div class="d-sm-flex justify-content-between align-items-center">
-                <h4 class="header-title">Data</h4>
-            </div>
-            <div class="trad-history mt-4">
-                <div class="tab-content" id="myTabContent">
-                    <div class="tab-pane fade show active" id="buy_order" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="dbkit-table">
-                                <tr class="heading-td">
-                                    <td>Device Name</td>
-                                    <td>IP Address</td>
-                                    <td>Threshold</td>
-                                    <td>Measurement Delay Time [s]</td>
-                                    <td>Temperature Average</td>
-                                    <td>Total Data Size</td>
-                                    <td>Last Data Date</td>
-                                    <td>Delete Temperature Data</td>
-                                </tr>
-                                {% for node in nodes %}
-                                <tr>
-                                    <td>{{ node.device_name }}</td>
-                                    <td>{{ node.ip_address }}</td>
-                                    <td>{{ node.threshold }}</td>
-                                    <td>{{ node.measurement_delay_time }}</td>
-                                    <td>{{ node.temperature_this_mount_average }} </td>
-                                    <td>{{ node.temperature_this_mount_count}}</td>
-                                    <td>#</td>
-                                    <td><a href="{% url 'node:api_temperature_delete' node.pk %}">Delete</a></td>
-                                </tr>
-                                {% endfor %}
-                                
-                            </table>
-                        </div>
-                    </div>
+            <h4 class="header-title">Progress Table</h4>
+            <div class="single-table">
+                <div class="table-responsive">
+                    <table class="table table-hover progress-table text-center">
+                        <thead class="text-uppercase">
+                            <tr>
+                                <th scope="col">Status</th>
+                                <th scope="col">Device Name</th>
+                                <th scope="col">IP Address</th>
+                                <th scope="col">Threshold</th>
+                                <th scope="col">Measurement Delay Time [s]</th>
+                                <th scope="col">Temperature Average</th>
+                                <th scope="col">Total Data Size</th>
+                                <th scope="col">Last Data Date</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for node in nodes %}
+                            <tr>
+                                <th>
+                                    <i id="{{node.device_name}}" class="fa fa-user"></i>
+                                </th>
+                                <th scope="row">
+                                    {{ node.device_name }}
+                                </th>
+                                <td>{{ node.ip_address }}</td>
+                                <td>{{ node.threshold }}</td>
+                                <td>{{ node.measurement_delay_time }}</td>
+                                <td>{{ node.temperature_this_mount_average }} </td>
+                                <td>{{ node.temperature_this_mount_count}}</td>
+                                <td>{{ node.temperature_last_update_date }}</td>
+                                <td>
+                                    <ul class="d-flex justify-content-center">
+                                        <li class="mr-3"><a href="{% url 'node:node_update' node.pk %}" class="text-secondary"><i class="fa fa-edit"></i></a></li>
+                                        <li class="mr-3"><a href="{% url 'node:api_temperature_delete' node.pk %}" class="text-danger"><i class="ti-trash "></i></a></li>
+                                        <li class=""><a href="{% url 'node:api_node_delete' node.pk %}" class="text-danger"><i class="fa fa-minus "></i></a></li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
+            <div style='float:right;'>
+                <a href="{% url 'node:api_temperature_delete_all' %}?confirm=true" class="btn btn-danger btn-xs">delete all temperatures</a>
+            </div>    
         </div>
-    </div>
-    <div>
-        <a href="{% url 'node:api_temperature_delete_all' %}?confirm=true" class="btn btn-danger btn-xs">delete all temperatures</a>
     </div>
 </div>
 {% endblock %}
+
+{% block js %}
+<script>
+    $.getJSON('/api/node/is_active', {}, function (data, textStatus, jqXHR){
+        Object.keys(data).forEach(function(key) {
+            var value = data[key];
+            if(value){$("#" + key).css("color", "green");}
+            else{$("#" + key).css("color", "red");}
+        });
+    }); 
+
+    
+
+</script>
+{% endblock %}
+

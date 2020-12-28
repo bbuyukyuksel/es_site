@@ -1,3 +1,5 @@
+from pythonping import ping
+
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "es_site.settings")
 import django

@@ -1,6 +1,21 @@
-from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
+from django.shortcuts import render, HttpResponse, redirect, get_object_or_404, reverse
 from node.models import Node, Temperature
+from django.contrib import messages
 import json
+
+'''
+messages.debug(request, '%s SQL statements were executed.' % count)
+messages.info(request, 'Three credits remain in your account.')
+messages.success(request, 'Profile details updated.')
+messages.warning(request, 'Your account expires in three days.')
+messages.error(request, 'Document deleted.')
+
+alert-success
+alert-info
+alert-warning
+alert-danger
+
+'''
 
 # Create your views here.
 def index(request):
@@ -30,8 +45,19 @@ def node_create(request):
         "form_name": "Create",
 
     }
-    return render(request, 'node/form.html', context=context)
+    return render(request, 'node/form_node_create.html', context=context)
+
+def node_update(request, pk):
+    node = get_object_or_404(Node, pk=pk)
+    print(node.threshold)        
+    context = {
+        'form_name': 'Update',
+        'node': node,
+    }
+    return render(request, 'node/form_node_update.html', context=context)
+
     
+
 
 def node_delete(request):
     pass
@@ -43,17 +69,16 @@ def node_list(request):
     nodes = Node.objects.all()
     if nodes.count() > 0:
         t = nodes.first().temperature_last_update_date()
-        print("Last:", t)
     return render(request, 'node/list.html', context={'nodes':nodes})
 
 def api_node_create(request):
-    if request.GET:
-        device_name = request.GET.get("device_name")
-        ip_address = request.GET.get('ip_address', None)
-        threshold = request.GET.get('threshold', None)
-        m_d_time = request.GET.get('m_d_time', None)
+    if request.method == "POST":
+        device_name = request.POST.get("device_name")
+        ip_address = request.POST.get('ip_address', None)
+        threshold = request.POST.get('threshold', None)
+        m_d_time = request.POST.get('m_d_time', None)
 
-        confirm = request.GET.get("confirm", None)
+        confirm = request.POST.get("confirm", None)
         if confirm and device_name and ip_address and threshold and m_d_time:
             ip_address = ip_address.strip()
             
@@ -61,24 +86,49 @@ def api_node_create(request):
             unique_contol_ip_address = Node.objects.filter(ip_address=ip_address)
             
             if unique_contol_device_name.count() > 0:
-                return HttpResponse(f"Already saved {device_name}")
+                messages.error(request, f"Already saved {device_name}", extra_tags='alert-danger')
+                return redirect('node:node_create')
 
             if unique_contol_ip_address.count() > 0:
-                return HttpResponse(f"Already saved {ip_address}")
+                messages.error(request, f"Already saved {ip_address}", extra_tags='alert-danger')
+                return redirect('node:node_create')
 
             node = Node(device_name=device_name, ip_address=ip_address, threshold=threshold, measurement_delay_time=m_d_time)
             node.save()
+            messages.success(request, f"Node is saved", extra_tags='alert-success')
             return redirect('node:node_list')
-            #return HttpResponse(f"Get Request api_node_create {device_name}, {confirm}, Saved PK: {node.pk}")
-        else:    
-            return redirect('node:node_list')
-            #return HttpResponse(f"Device create fail!")
-    
 
-def api_node_delete(request):
-    if request.GET:
-        return HttpResponse("Get Request api_node_delete")
-    pass
+        else:    
+            messages.error(request, f"Node is not saved", extra_tags='alert-danger')
+            return redirect('node:node_list')
+            
+
+def api_node_update(request, pk):
+    if request.method == 'POST':
+        if request.POST.get('confirm', None):
+            node = get_object_or_404(Node, pk=pk)
+            device_name = request.POST.get('device_name', None)
+            ip_address = request.POST.get('ip_address', None)
+            threshold = request.POST.get('threshold', None)
+            m_d_time = request.POST.get('m_d_time', None)
+
+            if device_name: node.device_name = device_name
+            if ip_address: node.ip_address = ip_address
+            if threshold: node.threshold = threshold
+            if m_d_time: node.measurement_delay_time = m_d_time 
+            node.save()
+            messages.success(request, 'Node is updated', extra_tags='alert-success')
+        else:
+            #Kaydedilemedi.
+            messages.error(request, 'Node is not updated', extra_tags='alert-danger')
+        return redirect(reverse('node:node_update', args=(pk,)))
+
+        
+def api_node_delete(request, pk):
+    node = get_object_or_404(Node, pk=pk)
+    node.delete()
+    messages.success(request, 'Node is deleted', extra_tags='alert-success')
+    return redirect(reverse('node:node_list'))
 
 def api_node_detail(request):
     if request.GET:
@@ -108,7 +158,14 @@ def api_node_parameter(request):
             else:
                 return HttpResponse("-1")
 
+def api_node_is_active(request):
+    nodes = Node.objects.all()
+    r = {}
 
+    for node in nodes:
+        r[node.device_name] = node.is_active()
+
+    return HttpResponse(json.dumps(r))
 
 def api_node_temperature_create(request):
     if request.GET:
